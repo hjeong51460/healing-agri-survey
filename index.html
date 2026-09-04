@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>치유농업사 활동실적 조사</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<style>
+  :root {
+    --soil: #8A6D1F;
+    --soil-dark: #5F4A12;
+    --leaf: #D4A93B;
+    --cream: #FBEFC8;
+    --card: #FFFDF5;
+    --line: #E8D89A;
+    --ink: #40371B;
+    --ink-soft: #7A6A3A;
+    --gold: #B9791F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; }
+  .wrap-wide { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+  .cta-banner {
+    background: #F9D9D3;
+    color: #8A2E1F;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .masthead {
+    border-bottom: 2px solid var(--soil);
+    padding-bottom: 18px;
+    margin-bottom: 28px;
+  }
+  .masthead .eyebrow {
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    margin: 0 0 6px;
+  }
+  .masthead h1 {
+    font-family: "Black Han Sans", "Noto Sans KR", sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    margin: 0 0 8px;
+    color: var(--soil-dark);
+  }
+  .masthead p {
+    margin: 0;
+
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--soil);
+    border-color: var(--soil);
+    color: #fff;
+    font-weight: 600;
+  }
+  .panel { display: none; }
+  .panel.show { display: block; }
+
+  .sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .sub-tab {
+    padding: 8px 14px;
+
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    background: #fff;
+  }
+  .sub-tab.active {
+    background: var(--soil-dark);
+    border-color: var(--soil-dark);
+    color: #fff;
+    font-weight: 600;
+  }
+  .subpanel { display: none; }
+  .subpanel.show { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px 22px;
+  }
+  .card + .card { margin-top: 16px; }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--soil-dark);
+    margin-bottom: 6px;
+  }
+
+  input[type=text], input[type=password], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: #fff;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--soil);
+  }
+  textarea { resize: vertical; min-height: 66px; }
+  .period-row { display: flex; align-items: center; gap: 8px; }
+  .period-row input { flex: 1; }
+  .period-row span { color: var(--ink-soft); font-size: 13px; }
+
+  .phone-row { display: flex; align-items: center; gap: 8px; }
+  .phone-row input { flex: 1; text-align: center; }
+  .phone-row input.phone-fixed { flex: 0.8; background: #F3E2A6; color: var(--ink-soft); font-weight: 600; }
+  .phone-row span { color: var(--ink-soft); font-size: 13px; }
+
+  .choice-row { display: flex; gap: 8px; }
+  .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choice-grid .choice { padding: 9px 6px; font-size: 12px; }
+  .choice {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    border: 1.5px solid var(--line);
+
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    background: #fff;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+  }
+  .choice.selected {
+    border-color: var(--soil-dark);
+    background: var(--soil);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px #F7E8B0 inset;
+  }
+
+  .examples {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: #F3E2A6;
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.7;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--soil);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--soil-dark); }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .btn-secondary {
+    background: #fff; border: 1px solid var(--line); color: var(--ink-soft);
+  }
+  .btn-secondary:hover { background: #F3E2A6; }
+
+  .error { color: #A33; font-size: 12px; margin-top: 4px; display: none; }
+  .invalid-border { border-color: #C1443B !important; box-shadow: 0 0 0 2px rgba(193,68,59,0.15); }
+  .invalid-group { outline: 2px solid #C1443B; outline-offset: 2px; border-radius: 8px; }
+  .pin-hint { font-size: 12px; color: var(--ink-soft); margin: 4px 0 0; }
+
+  .thanks {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .thanks .mark {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--leaf); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; font-size: 24px;
+  }
+  .thanks h2 { font-size: 18px; margin: 0 0 8px; color: var(--soil-dark); }
+  .thanks p { font-size: 14px; color: var(--ink-soft); margin: 0 0 20px; }
+
+  .toolbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+
+  }
+  .toolbar .count { font-size: 13px; color: var(--ink-soft); }
+  .refresh-btn {
+    background: transparent; border: 1px solid var(--line);
+    border-radius: 6px; padding: 7px 12px; font-size: 12px;
+    cursor: pointer; color: var(--soil-dark);
+  }
+
+  .delete-row-btn {
+    background: #fff; border: 1px solid #C1443B;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px;
+    cursor: pointer; color: #C1443B; font-weight: 600;
+    white-space: nowrap;
+  }
+  .delete-row-btn:hover { background: #C1443B; color: #fff; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--soil);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  td.name { font-weight: 600; white-space: nowrap; }
+  td.remark { text-align: center; color: var(--gold); font-weight: 600; }
+  .table-wrap { overflow-x: auto; border-radius: 8px; }
+
+  .empty-row td {
+    text-align: center;
+    color: var(--ink-soft);
+    padding: 28px;
+  }
+
+  .lock-note {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 12px; color: var(--ink-soft);
+    background: #F3E2A6; border-radius: 6px; padding: 10px 12px;
+    margin-bottom: 18px; line-height: 1.6;
+  }
+
+  .mine-entry-card + .mine-entry-card { margin-top: 16px; }
+
+  .program-block {
+    border: 2px solid var(--leaf);
+    border-radius: 10px;
+    padding: 0 16px 14px;
+    margin-bottom: 24px;
+    position: relative;
+    background: #FFFCF2;
+  }
+  .program-block.invalid-block {
+    border-color: #C1443B;
+  }
+  .program-block .block-title {
+    font-size: 13px;
+    color: #fff;
+    background: var(--soil);
+    font-weight: 700;
+    margin: 0 -16px 14px;
+
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+  }
+  .program-block.invalid-block .block-title {
+    background: #C1443B;
+  }
+  .remove-block-btn {
+    position: absolute;
+    top: 9px; right: 12px;
+    background: none; border: none;
+    color: #fff;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .add-block-btn {
+    width: 100%;
+    padding: 13px;
+    background: #C1443B;
+    border: 1px solid #A3372F;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  .add-block-btn:hover { background: #A3372F; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cta-banner">향후 경남치유농업사협회 발전을 위해서 적극적으로 실적 기입 부탁드립니다!</div>
+
+  <div class="masthead">
+    <p class="eyebrow">치유농업사 활용 현황조사</p>
+    <h1>치유농업사 활동실적 조사</h1>
+    <p style="font-weight:600; color:var(--soil-dark); margin-bottom:6px;">대상기간 : 2026. 1. 1. ~ 현재까지</p>
+    <p>아래 양식에 맞춰 활용실적을 입력해 주세요. 입력하신 내용은 바로 반영됩니다.</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="form">입력하기</div>
+    <div class="tab" data-tab="mine">내 항목</div>
+    <div class="tab" data-tab="admin">전체보기</div>
+  </div>
+
+  <div class="panel show" id="panel-form">
+    <div class="card" id="form-card">
+      <div class="field">
+        <label>성명</label>
+        <input type="text" id="f-name" placeholder="예: 홍길동">
+        <p class="error" id="err-name">성명을 입력해 주세요.</p>
+      </div>
+
+      <div class="field">
+        <label>휴대폰번호</label>
+        <div class="phone-row">
+          <input type="text" value="010" disabled class="phone-fixed">
+          <span>-</span>
+          <input type="text" id="f-phone-1" inputmode="numeric" maxlength="4" placeholder="1234">
+          <span>-</span>
+          <input type="text" id="f-phone-2" inputmode="numeric" maxlength="4" placeholder="5678">
+
+        </div>
+        <p class="error" id="err-phone">휴대폰번호를 정확히 입력해 주세요.</p>
+      </div>
+
+      <div class="field">
+        <label>소속시군</label>
+        <input type="text" id="f-region" placeholder="예: OO시 / OO군">
+        <p class="error" id="err-region">소속시군을 입력해 주세요.</p>
+      </div>
+
+      <div class="field">
+        <label>치유농업사 취득연도</label>
+        <div class="choice-row" id="f-remark">
+          <div class="choice" data-value="2024">2024</div>
+          <div class="choice" data-value="2025">2025</div>
+          <div class="choice" data-value="2026">2026</div>
+        </div>
+      </div>
+
+      <div id="f-blocks"></div>
+      <button type="button" class="add-block-btn" id="add-block-btn">+ 활동실적 추가</button>
+
+      <div class="field">
+        <label>개인정보동의여부</label>
+        <div class="choice-row" id="f-consent">
+          <div class="choice" data-value="예">예</div>
+          <div class="choice" data-value="아니오">아니오</div>
+        </div>
+        <p class="error" id="err-consent">개인정보 수집·이용에 동의하셔야 제출할 수 있어요.</p>
+      </div>
+
+      <div class="field">
+
+        <label>수정용 비밀번호</label>
+        <input type="password" id="f-pin" placeholder="나중에 내 항목을 조회·수정할 때 쓸 비밀번호 (4자 이상)">
+        <p class="pin-hint">잊지 않게 기억해 두세요. 성명 + 이 비밀번호로만 본인 항목을 확인·수정할 수 있어요.</p>
+        <p class="error" id="err-pin">4자 이상으로 입력해 주세요.</p>
+      </div>
+
+      <button class="btn" id="submit-btn" style="margin-top:22px;">제출하기</button>
+    </div>
+
+    <div class="card thanks" id="thanks-card" style="display:none;">
+      <div class="mark"><i>✓</i></div>
+      <h2>제출됐어요</h2>
+      <p>실적이 반영됐습니다. 다른 항목을 이어서 입력하실 수 있어요.</p>
+      <button class="btn btn-secondary" id="again-btn" style="width:auto; padding:9px 16px; font-size:13px;">한 건 더 입력하기</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-mine">
+    <div class="card">
+      <div class="lock-note">본인이 입력할 때 사용한 성명과 비밀번호를 넣으면, 본인이 등록한 항목만 조회하고 수정할 수 있어요. 다른 사람의 자료는 보이지 않습니다.</div>
+      <div class="field">
+        <label>성명</label>
+        <input type="text" id="m-name" placeholder="입력할 때 사용한 성명">
+      </div>
+      <div class="field">
+        <label>비밀번호</label>
+        <input type="password" id="m-pin" placeholder="입력할 때 설정한 비밀번호">
+      </div>
+      <p class="error" id="err-mine">일치하는 항목을 찾을 수 없어요. 성명과 비밀번호를 확인해 주세요.</p>
+      <button class="btn" id="mine-lookup-btn" style="margin-top:6px;">내 항목 조회</button>
+    </div>
+
+    <div id="mine-results"></div>
+  </div>
+
+</div>
+
+<div class="wrap-wide">
+  <div class="panel" id="panel-admin">
+    <div class="card" id="admin-gate-card">
+      <div class="field">
+        <label>관리자 비밀번호</label>
+        <input type="password" id="admin-pin-input" placeholder="관리자 비밀번호">
+      </div>
+      <p class="error" id="err-admin">비밀번호가 일치하지 않아요.</p>
+      <button class="btn" id="admin-submit-btn">확인</button>
+    </div>
+
+    <div id="admin-content" style="display:none;">
+      <div class="toolbar">
+        <span class="count" id="result-count">불러오는 중…</span>
+        <div style="display:flex; gap:8px;">
+          <button class="refresh-btn" id="download-btn">엑셀 다운로드</button>
+          <button class="refresh-btn" id="refresh-btn">새로고침</button>
+        </div>
+      </div>
+
+      <div class="subpanel show" id="subpanel-summary">
+        <div id="admin-edit-panel" style="display:none; margin-bottom:20px;"></div>
+
+        <p style="font-weight:700; color:var(--soil-dark); margin:0 0 8px;">치유농업사 활용실적</p>
+        <div class="table-wrap" style="margin-bottom:28px;">
+          <table id="simple-summary-table">
+            <thead>
+
+              <tr>
+                <th style="width:80px;">시군</th>
+                <th style="width:80px;">성명</th>
+                <th style="width:100px;">구분</th>
+                <th style="width:110px;">활용기간</th>
+                <th>프로그램 또는 교육명</th>
+                <th style="width:90px;">치유농업사<br>취득연도</th>
+                <th style="width:100px;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="simple-summary-body">
+              <tr class="empty-row"><td colspan="7">불러오는 중…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="font-weight:700; color:var(--soil-dark); margin:0 0 8px;">유관기관 추진실적</p>
+        <p class="pin-hint" style="margin-bottom:14px;">운영회차 2회 이상인 활동실적은 최종성과로 반영되고, 매출액·효과측정여부·참여자합계·유관기관개수도 2회 이상 실적만 집계돼요. 구분은 치유농업사로 전체 고정했습니다.</p>
+
+        <div class="table-wrap">
+          <table id="summary-final-table">
+            <thead>
+              <tr>
+                <th rowspan="2" style="width:60px;">성명</th>
+                <th rowspan="2" style="width:100px;">휴대폰번호</th>
+                <th rowspan="2" style="width:70px;">소속시군</th>
+                <th rowspan="2" style="width:60px;">구분</th>
+                <th colspan="2" style="background:#FBE7A1; color:var(--soil-dark);">학생관련 유관기관</th>
+                <th colspan="2" style="background:#C9DCF0; color:var(--soil-dark);">노인관련 유관기관</th>
+                <th colspan="2" style="background:#D6D0EC; color:var(--soil-dark);">장애인관련 유관기관</th>
+                <th colspan="2" style="background:#CFE6D2; color:var(--soil-dark);">정신건강관련 유관기관</th>
+                <th colspan="2" style="background:#E4E0D6; color:var(--soil-dark);">학생, 노인, 장애인, 정신건강<br>외 유관기관의 합</th>
+
+                <th colspan="4" style="background:#C1443B;">❷ 최종성과<br>(2회이상 실적 포함)</th>
+                <th colspan="2" style="background:#F4B8C6; color:var(--soil-dark);">(참고용 조사자료)<br>1회 프로그램 운영 실적</th>
+                <th rowspan="2" style="width:100px;">관리</th>
+              </tr>
+              <tr>
+                <th style="width:100px;">기관명</th>
+                <th style="width:60px;">참여자수</th>
+                <th style="width:100px;">기관명</th>
+                <th style="width:60px;">참여자수</th>
+                <th style="width:100px;">기관명</th>
+                <th style="width:60px;">참여자수</th>
+                <th style="width:100px;">기관명</th>
+                <th style="width:60px;">참여자수</th>
+                <th style="width:100px;">기관명</th>
+                <th style="width:60px;">참여자수</th>
+                <th style="width:70px;">유관기관<br>개수</th>
+                <th style="width:70px;">참여자<br>합계</th>
+                <th style="width:90px;">매출액(원)</th>
+                <th style="width:70px;">효과측정<br>여부</th>
+                <th style="width:100px;">기관명<br>(단체명 등)</th>
+                <th style="width:60px;">참여자수</th>
+              </tr>
+            </thead>
+            <tbody id="summary-final-body">
+              <tr class="empty-row"><td colspan="21">불러오는 중…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Firebase 설정: 아래 값을 Firebase 콘솔 > 프로젝트 설정 > 내 앱 에서 복사해 붙여넣으세요 ----
+const firebaseConfig = {
+  apiKey: "AIzaSyAXlsiUFHSL7G76V2XY7A3zMif-CbILNXA",
+  authDomain: "cldbshddjq.firebaseapp.com",
+  projectId: "cldbshddjq",
+  storageBucket: "cldbshddjq.firebasestorage.app",
+  messagingSenderId: "960685767852",
+  appId: "1:960685767852:web:a8410c1eee4fc5aacbb309"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ---- window.storage 어댑터: 기존 코드는 전혀 건드리지 않고, Claude 아티팩트 전용 저장소 API를
+// 동일한 이름/모양으로 Firestore 위에 재구현합니다. entries 컬렉션에 문서 1건 = 응답 1건. ----
+window.storage = {
+  async list(prefix, apply) {
+    const snap = await db.collection('entries').get();
+    return { keys: snap.docs.map(function(d) { return 'entry:' + d.id; }) };
+  },
+  async get(key, apply) {
+    const id = key.replace(/^entry:/, '');
+    const doc = await db.collection('entries').doc(id).get();
+    if (!doc.exists) return null;
+    return { value: JSON.stringify(doc.data()) };
+  },
+  async set(key, value, apply) {
+    const id = key.replace(/^entry:/, '');
+    await db.collection('entries').doc(id).set(JSON.parse(value));
+    return true;
+  },
+  async delete(key, apply) {
+    const id = key.replace(/^entry:/, '');
+    await db.collection('entries').doc(id).delete();
+    return true;
+  }
+};
+
+let selectedRemark = null;
+let selectedConsent = null;
+let blockCounter = 0;
+const ADMIN_PASSWORD = 'happy1023!';
+let adminUnlocked = false;
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function formatDateMask(digits) {
+  digits = digits.slice(0, 8);
+  let out = digits.slice(0, 4);
+  if (digits.length > 4) out += '-' + digits.slice(4, 6);
+  if (digits.length > 6) out += '-' + digits.slice(6, 8);
+  return out;
+}
+
+function attachDateMask(input) {
+  input.addEventListener('input', function() {
+    const digits = input.value.replace(/[^0-9]/g, '');
+    input.value = formatDateMask(digits);
+  });
+}
+
+function makeBlockHTML(idx, data) {
+  data = data || {};
+  const types = ['채용', '프로그램 운영', '교육'];
+
+  const orgTypes = ['학생관련 유관기관', '노인관련 유관기관', '장애인관련 유관기관', '정신건강관련 유관기관', '그외 유관기관', '시군농업기술센터'];
+  return '<div class="program-block" data-idx="' + idx + '">' +
+    '<div class="block-title">활동실적</div>' +
+    '<button type="button" class="remove-block-btn">이 활동실적 삭제</button>' +
+    '<div class="field"><label>프로그램 또는 교육명</label>' +
+      '<textarea class="p-task" placeholder="예: 인지건강 개선 프로그램 운영">' + escapeHtml(data.task || '') + '</textarea>' +
+      '<div class="examples">예시) 치유농업센터 운영 · 시설운영자 교육 · 인지건강 개선 프로그램</div>' +
+    '</div>' +
+    '<div class="field"><label>구분 <span style="font-weight:400; color:var(--ink-soft);">(3개 중 1개 선택)</span></label>' +
+      '<div class="choice-row p-type">' +
+        types.map(function(t) {
+          return '<div class="choice' + (t === data.type ? ' selected' : '') + '" data-value="' + t + '">' + t + '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="field"><label>프로그램 운영(출강한) 기관유형 <span style="font-weight:400; color:var(--ink-soft);">(6개 중 1개 선택)</span></label>' +
+      '<div class="choice-grid p-org">' +
+        orgTypes.map(function(o) {
+          return '<div class="choice' + (o === data.orgType ? ' selected' : '') + '" data-value="' + o + '">' + o + '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="field"><label>기관명</label>' +
+      '<input type="text" class="p-orgname" value="' + escapeHtml(data.orgName || '') + '" placeholder="예: OO초등학교, OO요양원">' +
+    '</div>' +
+    '<div class="field"><label>활용기간</label><div class="period-row">' +
+      '<input type="text" class="p-start" inputmode="numeric" maxlength="10" value="' + escapeHtml(data.start || '') + '" placeholder="2026-03-01">' +
+      '<span>~</span>' +
+      '<input type="text" class="p-end" inputmode="numeric" maxlength="10" value="' + escapeHtml(data.end || '') + '" placeholder="2026-08-31">' +
+    '</div></div>' +
+    '<div class="field"><label>운영회차</label><div class="period-row" style="max-width:140px;">' +
+      '<input type="text" class="p-count" inputmode="numeric" maxlength="4" value="' + escapeHtml(data.count || '') + '" placeholder="예: 12">' +
+
+      '<span>회</span>' +
+    '</div></div>' +
+    '<div class="field"><label>참여자수 <span style="font-weight:400; color:var(--ink-soft);">(예시 : 7명 x 5회기 = 35명)</span></label><div class="period-row" style="max-width:140px;">' +
+      '<input type="text" class="p-participants" inputmode="numeric" maxlength="5" value="' + escapeHtml(data.participants || '') + '" placeholder="예: 25">' +
+      '<span>명</span>' +
+    '</div></div>' +
+    '<div class="field"><label>매출액 <span style="font-weight:400; color:var(--ink-soft);">(강사수당 또는 프로그램운영비)</span></label><div class="period-row">' +
+      '<input type="text" class="p-revenue" inputmode="numeric" value="' + escapeHtml(data.revenue || '') + '" placeholder="예: 500000">' +
+      '<span>원</span>' +
+    '</div></div>' +
+    '<div class="field"><label>효과측정여부</label>' +
+      '<div class="choice-row p-effect">' +
+        ['예', '아니오'].map(function(v) {
+          return '<div class="choice' + (v === data.effect ? ' selected' : '') + '" data-value="' + v + '">' + v + '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renumberBlocks(container) {
+  const blocks = container.querySelectorAll('.program-block');
+  blocks.forEach(function(b, i) {
+    b.querySelector('.block-title').textContent = '활동실적' + (i + 1);
+    b.querySelector('.remove-block-btn').style.display = blocks.length > 1 ? 'block' : 'none';
+  });
+}
+
+function addBlock(container, data) {
+  blockCounter++;
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = makeBlockHTML(blockCounter, data);
+
+  const block = wrapper.firstElementChild;
+  container.appendChild(block);
+
+  const taskInput = block.querySelector('.p-task');
+  taskInput.addEventListener('input', function() {
+    markInvalid(taskInput, false);
+  });
+  const orgNameInput = block.querySelector('.p-orgname');
+  orgNameInput.addEventListener('input', function() {
+    markInvalid(orgNameInput, false);
+  });
+  attachDateMask(block.querySelector('.p-start'));
+  attachDateMask(block.querySelector('.p-end'));
+  const countInput = block.querySelector('.p-count');
+  countInput.addEventListener('input', function() {
+    countInput.value = countInput.value.replace(/[^0-9]/g, '');
+  });
+  const participantsInput = block.querySelector('.p-participants');
+  participantsInput.addEventListener('input', function() {
+    participantsInput.value = participantsInput.value.replace(/[^0-9]/g, '');
+  });
+  const revenueInput = block.querySelector('.p-revenue');
+  revenueInput.addEventListener('input', function() {
+    const digits = revenueInput.value.replace(/[^0-9]/g, '');
+    revenueInput.value = digits ? Number(digits).toLocaleString('ko-KR') : '';
+  });
+  const typeGroup = block.querySelector('.p-type');
+  typeGroup.querySelectorAll('.choice').forEach(function(el) {
+    el.addEventListener('click', function() {
+      typeGroup.querySelectorAll('.choice').forEach(function(c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+      markInvalid(typeGroup, false, 'invalid-group');
+
+    });
+  });
+  const orgGroup = block.querySelector('.p-org');
+  orgGroup.querySelectorAll('.choice').forEach(function(el) {
+    el.addEventListener('click', function() {
+      orgGroup.querySelectorAll('.choice').forEach(function(c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+      markInvalid(orgGroup, false, 'invalid-group');
+    });
+  });
+  const effectGroup = block.querySelector('.p-effect');
+  effectGroup.querySelectorAll('.choice').forEach(function(el) {
+    el.addEventListener('click', function() {
+      effectGroup.querySelectorAll('.choice').forEach(function(c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+      markInvalid(effectGroup, false, 'invalid-group');
+    });
+  });
+  block.querySelector('.remove-block-btn').addEventListener('click', function() {
+    if (container.querySelectorAll('.program-block').length <= 1) return;
+    block.remove();
+    renumberBlocks(container);
+  });
+
+  renumberBlocks(container);
+  return block;
+}
+
+function readBlocks(container, forceAll) {
+  const blocks = Array.from(container.querySelectorAll('.program-block'));
+  const programs = [];
+  let hasError = false;
+
+  blocks.forEach(function(b) {
+    const taskEl = b.querySelector('.p-task');
+    const task = taskEl.value.trim();
+    const typeGroup = b.querySelector('.p-type');
+    const sel = typeGroup.querySelector('.choice.selected');
+    const type = sel ? sel.dataset.value : '';
+    const orgGroup = b.querySelector('.p-org');
+    const orgSel = orgGroup.querySelector('.choice.selected');
+    const orgType = orgSel ? orgSel.dataset.value : '';
+    const orgNameEl = b.querySelector('.p-orgname');
+    const orgName = orgNameEl.value.trim();
+    const start = b.querySelector('.p-start').value.trim();
+    const end = b.querySelector('.p-end').value.trim();
+    const period = start || end ? (start + (end ? ' ~ ' + end : '')) : '';
+    const count = b.querySelector('.p-count').value.trim();
+    const participants = b.querySelector('.p-participants').value.trim();
+    const revenue = b.querySelector('.p-revenue').value.trim();
+    const effectGroup = b.querySelector('.p-effect');
+    const effectSel = effectGroup.querySelector('.choice.selected');
+    const effect = effectSel ? effectSel.dataset.value : '';
+    const touched = forceAll || task || type || orgType || orgName || start || end || count || participants || revenue || effect;
+
+    if (!touched) {
+      markInvalid(taskEl, false);
+      markInvalid(typeGroup, false, 'invalid-group');
+      markInvalid(orgGroup, false, 'invalid-group');
+      markInvalid(orgNameEl, false);
+      markInvalid(effectGroup, false, 'invalid-group');
+      b.classList.remove('invalid-block');
+      return;
+    }
+
+    const missing = !task || !type || !orgType || !orgName || !effect;
+    markInvalid(taskEl, !task);
+    markInvalid(typeGroup, !type, 'invalid-group');
+    markInvalid(orgGroup, !orgType, 'invalid-group');
+    markInvalid(orgNameEl, !orgName);
+    markInvalid(effectGroup, !effect, 'invalid-group');
+    b.classList.toggle('invalid-block', missing);
+
+    if (missing) { hasError = true; return; }
+    programs.push({ task: task, type: type, orgType: orgType, orgName: orgName, period: period, count: count, participants: participants, revenue: revenue, effect: effect });
+  });
+  return { programs: programs, hasError: hasError };
+}
+
+const fBlocksContainer = document.getElementById('f-blocks');
+addBlock(fBlocksContainer);
+
+document.getElementById('add-block-btn').addEventListener('click', function() {
+  addBlock(fBlocksContainer);
+});
+
+document.querySelectorAll('#f-remark .choice').forEach(function(el) {
+  el.addEventListener('click', function() {
+    document.querySelectorAll('#f-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedRemark = el.dataset.value;
+    markInvalid(document.getElementById('f-remark'), false, 'invalid-group');
+  });
+});
+
+document.querySelectorAll('#f-consent .choice').forEach(function(el) {
+  el.addEventListener('click', function() {
+
+    document.querySelectorAll('#f-consent .choice').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedConsent = el.dataset.value;
+    hideError('err-consent');
+    markInvalid(document.getElementById('f-consent'), false, 'invalid-group');
+  });
+});
+
+['f-phone-1', 'f-phone-2'].forEach(function(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+    markInvalid(document.getElementById('f-phone-1'), false);
+    markInvalid(document.getElementById('f-phone-2'), false);
+  });
+});
+
+['f-name', 'f-region', 'f-pin'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', function() {
+    markInvalid(this, false);
+  });
+});
+
+function showError(id) { document.getElementById(id).style.display = 'block'; }
+function hideError(id) { document.getElementById(id).style.display = 'none'; }
+
+async function fetchAllEntries() {
+  const list = await window.storage.list('entry:', true);
+  const keys = (list && list.keys) ? list.keys : [];
+  const pairs = [];
+  for (const key of keys) {
+    try {
+
+      const r = await window.storage.get(key, true);
+      if (r && r.value) pairs.push([key, JSON.parse(r.value)]);
+    } catch (e) {}
+  }
+  pairs.sort(function(a, b) { return (a[1].ts || 0) - (b[1].ts || 0); });
+  return pairs;
+}
+
+function markInvalid(el, bad, cls) {
+  cls = cls || 'invalid-border';
+  if (bad) el.classList.add(cls); else el.classList.remove(cls);
+}
+
+document.getElementById('submit-btn').addEventListener('click', async function() {
+  const name = document.getElementById('f-name').value.trim();
+  const region = document.getElementById('f-region').value.trim();
+  const phone1 = document.getElementById('f-phone-1').value.trim();
+  const phone2 = document.getElementById('f-phone-2').value.trim();
+  const pin = document.getElementById('f-pin').value.trim();
+
+  let ok = true;
+  const nameBad = !name;
+  if (nameBad) { showError('err-name'); ok = false; } else { hideError('err-name'); }
+  markInvalid(document.getElementById('f-name'), nameBad);
+
+  const phoneBad = phone1.length !== 4 || phone2.length !== 4;
+  if (phoneBad) { showError('err-phone'); ok = false; } else { hideError('err-phone'); }
+  markInvalid(document.getElementById('f-phone-1'), phoneBad);
+  markInvalid(document.getElementById('f-phone-2'), phoneBad);
+
+  const regionBad = !region;
+  if (regionBad) { showError('err-region'); ok = false; } else { hideError('err-region'); }
+
+  markInvalid(document.getElementById('f-region'), regionBad);
+
+  const remarkBad = !selectedRemark;
+  markInvalid(document.getElementById('f-remark'), remarkBad, 'invalid-group');
+
+  const consentBad = selectedConsent !== '예';
+  if (consentBad) { showError('err-consent'); ok = false; } else { hideError('err-consent'); }
+  markInvalid(document.getElementById('f-consent'), consentBad, 'invalid-group');
+
+  const pinBad = pin.length < 4;
+  if (pinBad) { showError('err-pin'); ok = false; } else { hideError('err-pin'); }
+  markInvalid(document.getElementById('f-pin'), pinBad);
+
+  let result = readBlocks(fBlocksContainer);
+  if (result.programs.length === 0) {
+    result = readBlocks(fBlocksContainer, true);
+  }
+  if (result.hasError || result.programs.length === 0) return;
+  if (!ok) return;
+
+  const entry = {
+    name: name,
+    phone: '010-' + phone1 + '-' + phone2,
+    region: region,
+    consent: selectedConsent,
+    remark: selectedRemark || '',
+    pin: pin,
+    programs: result.programs,
+    ts: Date.now()
+  };
+
+  const btn = document.getElementById('submit-btn');
+
+  btn.disabled = true;
+  btn.textContent = '제출 중…';
+
+  try {
+    const key = 'entry:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    const saveResult = await window.storage.set(key, JSON.stringify(entry), true);
+    if (!saveResult) throw new Error('저장 실패');
+    document.getElementById('form-card').style.display = 'none';
+    document.getElementById('thanks-card').style.display = 'block';
+  } catch (e) {
+    alert('제출 중 문제가 발생했어요. 다시 시도해 주세요.');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '제출하기';
+  }
+});
+
+document.getElementById('again-btn').addEventListener('click', function() {
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-region').value = '';
+  document.getElementById('f-pin').value = '';
+  document.getElementById('f-phone-1').value = '';
+  document.getElementById('f-phone-2').value = '';
+  hideError('err-pin');
+  hideError('err-name');
+  hideError('err-region');
+  hideError('err-phone');
+  hideError('err-consent');
+  document.querySelectorAll('#f-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
+  document.querySelectorAll('#f-consent .choice').forEach(function(c) { c.classList.remove('selected'); });
+  ['f-name', 'f-region', 'f-pin', 'f-phone-1', 'f-phone-2'].forEach(function(id) {
+
+    markInvalid(document.getElementById(id), false);
+  });
+  markInvalid(document.getElementById('f-remark'), false, 'invalid-group');
+  markInvalid(document.getElementById('f-consent'), false, 'invalid-group');
+  selectedRemark = null;
+  selectedConsent = null;
+  fBlocksContainer.innerHTML = '';
+  addBlock(fBlocksContainer);
+  document.getElementById('thanks-card').style.display = 'none';
+  document.getElementById('form-card').style.display = 'block';
+});
+
+document.getElementById('mine-lookup-btn').addEventListener('click', async function() {
+  const name = document.getElementById('m-name').value.trim();
+  const pin = document.getElementById('m-pin').value.trim();
+  hideError('err-mine');
+  document.getElementById('mine-results').innerHTML = '';
+  if (!name || !pin) { showError('err-mine'); return; }
+
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = '조회 중…';
+  try {
+    const pairs = await fetchAllEntries();
+    const mine = pairs.filter(function(p) {
+      return p[1].name === name && p[1].pin === pin;
+    });
+    if (mine.length === 0) { showError('err-mine'); return; }
+    renderMine(mine);
+  } catch (e) {
+    alert('조회 중 문제가 발생했어요.');
+    console.error(e);
+
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '내 항목 조회';
+  }
+});
+
+function renderMine(pairs) {
+  const container = document.getElementById('mine-results');
+  container.innerHTML = '';
+  pairs.forEach(function(pair) {
+    const key = pair[0];
+    const e = pair[1];
+    const card = document.createElement('div');
+    card.className = 'card mine-entry-card';
+    card.dataset.key = key;
+
+    card.innerHTML =
+      '<div class="field"><label>성명</label><input type="text" class="m-e-name" value="' + escapeHtml(e.name) + '"></div>' +
+      '<div class="field"><label>휴대폰번호</label><div class="phone-row">' +
+        '<input type="text" value="010" disabled class="phone-fixed">' +
+        '<span>-</span>' +
+        '<input type="text" class="m-e-phone-1" inputmode="numeric" maxlength="4" value="' + escapeHtml((e.phone || '').split('-')[1] || '') + '">' +
+        '<span>-</span>' +
+        '<input type="text" class="m-e-phone-2" inputmode="numeric" maxlength="4" value="' + escapeHtml((e.phone || '').split('-')[2] || '') + '">' +
+      '</div></div>' +
+      '<div class="field"><label>소속시군</label><input type="text" class="m-e-region" value="' + escapeHtml(e.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
+      '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row m-e-remark">' +
+        ['2024','2025','2026'].map(function(y) {
+          return '<div class="choice' + (y === e.remark ? ' selected' : '') + '" data-value="' + y + '">' + y + '</div>';
+        }).join('') +
+      '</div></div>' +
+      '<div class="m-e-blocks"></div>' +
+
+      '<button type="button" class="add-block-btn m-e-add">+ 활동실적 추가</button>' +
+      '<button class="btn m-e-save" style="margin-top:6px;">수정 저장</button>';
+
+    container.appendChild(card);
+
+    card.querySelectorAll('.m-e-phone-1, .m-e-phone-2').forEach(function(el) {
+      el.addEventListener('input', function() {
+        el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+      });
+    });
+
+    card.querySelectorAll('.m-e-remark .choice').forEach(function(el) {
+      el.addEventListener('click', function() {
+        card.querySelectorAll('.m-e-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
+        el.classList.add('selected');
+      });
+    });
+
+    const blocksContainer = card.querySelector('.m-e-blocks');
+    const programs = (e.programs && e.programs.length) ? e.programs : [{ task: e.task || '', type: e.type || '', period: e.period || '' }];
+    programs.forEach(function(p) {
+      const parts = (p.period || '').split(' ~ ');
+      addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', start: parts[0] || '', end: parts[1] || '', count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
+    });
+
+    card.querySelector('.m-e-add').addEventListener('click', function() {
+      addBlock(blocksContainer);
+    });
+
+    card.querySelector('.m-e-save').addEventListener('click', async function() {
+      const name = card.querySelector('.m-e-name').value.trim();
+      const phone1 = card.querySelector('.m-e-phone-1').value.trim();
+
+      const phone2 = card.querySelector('.m-e-phone-2').value.trim();
+      const region = card.querySelector('.m-e-region').value.trim();
+      const remarkSel = card.querySelector('.m-e-remark .choice.selected');
+      const remark = remarkSel ? remarkSel.dataset.value : '';
+
+      let result = readBlocks(blocksContainer);
+      if (result.programs.length === 0) {
+        result = readBlocks(blocksContainer, true);
+      }
+      if (result.hasError || result.programs.length === 0) {
+        return;
+      }
+      if (!name) {
+        alert('성명은 비워둘 수 없어요.');
+        return;
+      }
+      if (phone1.length !== 4 || phone2.length !== 4) {
+        alert('휴대폰번호를 정확히 입력해 주세요.');
+        return;
+      }
+      if (!region) {
+        alert('소속시군은 비워둘 수 없어요.');
+        return;
+      }
+
+      const updated = {
+        name: name,
+        phone: '010-' + phone1 + '-' + phone2,
+        region: region,
+        consent: e.consent,
+        remark: remark,
+        pin: e.pin,
+
+        programs: result.programs,
+        ts: e.ts
+      };
+
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = '저장 중…';
+      try {
+        const saveResult = await window.storage.set(key, JSON.stringify(updated), true);
+        if (!saveResult) throw new Error('저장 실패');
+        btn.textContent = '저장됐어요';
+        setTimeout(function() { btn.textContent = '수정 저장'; btn.disabled = false; }, 1500);
+      } catch (err) {
+        alert('저장 중 문제가 발생했어요.');
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = '수정 저장';
+      }
+    });
+  });
+}
+
+function openAdminTab() {
+  document.getElementById('err-admin').style.display = 'none';
+  document.getElementById('admin-pin-input').value = '';
+
+  if (adminUnlocked) {
+    document.getElementById('admin-gate-card').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    loadResults();
+    return;
+  }
+
+  document.getElementById('admin-gate-card').style.display = 'block';
+  document.getElementById('admin-content').style.display = 'none';
+}
+
+document.getElementById('admin-submit-btn').addEventListener('click', function() {
+  const pin = document.getElementById('admin-pin-input').value;
+  hideError('err-admin');
+
+  if (pin === ADMIN_PASSWORD) {
+    adminUnlocked = true;
+    document.getElementById('admin-gate-card').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    loadResults();
+  } else {
+    showError('err-admin');
+  }
+});
+
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('show'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('show');
+    if (tab.dataset.tab === 'admin') openAdminTab();
+  });
+});
+
+document.getElementById('refresh-btn').addEventListener('click', loadResults);
+document.getElementById('download-btn').addEventListener('click', downloadExcel);
+
+let currentEntries = [];
+
+function entryPrograms(e) {
+  return (e.programs && e.programs.length) ? e.programs : [{ task: e.task || '', type: e.type || '', period: e.period || '' }];
+}
+
+const ORG_BUCKETS = [
+  { label: '학생관련', match: ['학생관련 유관기관'] },
+  { label: '노인관련', match: ['노인관련 유관기관'] },
+  { label: '장애인관련', match: ['장애인관련 유관기관'] },
+  { label: '정신건강관련', match: ['정신건강관련 유관기관'] },
+  { label: '그외', match: ['그외 유관기관', '시군농업기술센터'] }
+];
+
+function bucketForOrgType(orgType) {
+  for (const bucket of ORG_BUCKETS) {
+    if (bucket.match.indexOf(orgType) !== -1) return bucket.label;
+  }
+  return '그외';
+}
+
+function renderSimpleSummary(pairs) {
+  const body = document.getElementById('simple-summary-body');
+  let rowsHtml = '';
+  let count = 0;
+
+  pairs.forEach(function(pair) {
+    const key = pair[0];
+    const e = pair[1];
+    const programs = entryPrograms(e);
+    programs.forEach(function(p, idx) {
+      count++;
+
+      rowsHtml += '<tr>';
+      rowsHtml += '<td>' + escapeHtml(e.region || '') + '</td>';
+      rowsHtml += '<td class="name">' + escapeHtml(e.name) + '</td>';
+      rowsHtml += '<td>' + escapeHtml(p.type || '') + '</td>';
+      rowsHtml += '<td>' + escapeHtml(p.period || '') + '</td>';
+      rowsHtml += '<td>' + escapeHtml(p.task || '').replace(/\n/g, '<br>') + '</td>';
+      rowsHtml += '<td style="text-align:center;">' + escapeHtml(e.remark || '') + '</td>';
+      rowsHtml += '<td style="text-align:center; white-space:nowrap;"><button class="edit-row-btn" data-key="' + escapeHtml(key) + '">수정</button> <button class="delete-row-btn" data-key="' + escapeHtml(key) + '" data-idx="' + idx + '">삭제</button></td>';
+      rowsHtml += '</tr>';
+    });
+  });
+
+  body.innerHTML = count ? rowsHtml : '<tr class="empty-row"><td colspan="7">아직 입력된 실적이 없어요.</td></tr>';
+
+  body.querySelectorAll('.delete-row-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm('이 활동실적 한 건을 삭제할까요? 되돌릴 수 없어요.')) return;
+      await deleteProgramFromEntry(btn.dataset.key, parseInt(btn.dataset.idx, 10));
+      loadResults();
+    });
+  });
+
+  body.querySelectorAll('.edit-row-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      adminEditEntry(btn.dataset.key);
+    });
+  });
+}
+
+async function deleteProgramFromEntry(key, idx) {
+  try {
+    const r = await window.storage.get(key, true);
+
+    if (!r || !r.value) return;
+    const entry = JSON.parse(r.value);
+    const programs = entryPrograms(entry).slice();
+    programs.splice(idx, 1);
+    if (programs.length === 0) {
+      await window.storage.delete(key, true);
+    } else {
+      entry.programs = programs;
+      await window.storage.set(key, JSON.stringify(entry), true);
+    }
+  } catch (e) {
+    alert('삭제 중 문제가 발생했어요.');
+    console.error(e);
+  }
+}
+
+async function deleteEntry(key) {
+  try {
+    await window.storage.delete(key, true);
+  } catch (e) {
+    alert('삭제 중 문제가 발생했어요.');
+    console.error(e);
+  }
+}
+
+async function adminEditEntry(key) {
+  const panel = document.getElementById('admin-edit-panel');
+  panel.innerHTML = '<div class="card">불러오는 중…</div>';
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  let entry;
+
+  try {
+    const r = await window.storage.get(key, true);
+    if (!r || !r.value) { panel.innerHTML = '<div class="card">항목을 찾을 수 없어요.</div>'; return; }
+    entry = JSON.parse(r.value);
+  } catch (e) {
+    panel.innerHTML = '<div class="card">불러오기에 실패했어요.</div>';
+    return;
+  }
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML =
+    '<p style="font-weight:700; color:var(--soil-dark); margin:0 0 14px;">' + escapeHtml(entry.name) + '님 실적 수정 (관리자)</p>' +
+    '<div class="field"><label>성명</label><input type="text" class="ae-name" value="' + escapeHtml(entry.name || '') + '"></div>' +
+    '<div class="field"><label>휴대폰번호</label><div class="phone-row">' +
+      '<input type="text" value="010" disabled class="phone-fixed">' +
+      '<span>-</span>' +
+      '<input type="text" class="ae-phone-1" inputmode="numeric" maxlength="4" value="' + escapeHtml((entry.phone || '').split('-')[1] || '') + '">' +
+      '<span>-</span>' +
+      '<input type="text" class="ae-phone-2" inputmode="numeric" maxlength="4" value="' + escapeHtml((entry.phone || '').split('-')[2] || '') + '">' +
+    '</div></div>' +
+    '<div class="field"><label>소속시군</label><input type="text" class="ae-region" value="' + escapeHtml(entry.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
+    '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row ae-remark">' +
+      ['2024','2025','2026'].map(function(y) {
+        return '<div class="choice' + (y === entry.remark ? ' selected' : '') + '" data-value="' + y + '">' + y + '</div>';
+      }).join('') +
+    '</div></div>' +
+    '<div class="ae-blocks"></div>' +
+    '<button type="button" class="add-block-btn ae-add">+ 활동실적 추가</button>' +
+    '<div class="btn-row"><button class="btn ae-cancel" style="background:#fff; border:1px solid var(--line); color:var(--ink-soft);">취소</button><button class="btn ae-save">저장</button></div>';
+
+  panel.innerHTML = '';
+
+  panel.appendChild(card);
+
+  card.querySelectorAll('.ae-phone-1, .ae-phone-2').forEach(function(el) {
+    el.addEventListener('input', function() {
+      el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+    });
+  });
+  card.querySelectorAll('.ae-remark .choice').forEach(function(el) {
+    el.addEventListener('click', function() {
+      card.querySelectorAll('.ae-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+    });
+  });
+
+  const blocksContainer = card.querySelector('.ae-blocks');
+  entryPrograms(entry).forEach(function(p) {
+    const parts = (p.period || '').split(' ~ ');
+    addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', start: parts[0] || '', end: parts[1] || '', count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
+  });
+  card.querySelector('.ae-add').addEventListener('click', function() {
+    addBlock(blocksContainer);
+  });
+
+  card.querySelector('.ae-cancel').addEventListener('click', function() {
+    panel.style.display = 'none';
+    panel.innerHTML = '';
+  });
+
+  card.querySelector('.ae-save').addEventListener('click', async function() {
+    const name = card.querySelector('.ae-name').value.trim();
+    const phone1 = card.querySelector('.ae-phone-1').value.trim();
+    const phone2 = card.querySelector('.ae-phone-2').value.trim();
+
+    const region = card.querySelector('.ae-region').value.trim();
+    const remarkSel = card.querySelector('.ae-remark .choice.selected');
+    const remark = remarkSel ? remarkSel.dataset.value : '';
+
+    let result = readBlocks(blocksContainer);
+    if (result.programs.length === 0) result = readBlocks(blocksContainer, true);
+    if (result.hasError || result.programs.length === 0) return;
+
+    if (!name) { alert('성명은 비워둘 수 없어요.'); return; }
+    if (phone1.length !== 4 || phone2.length !== 4) { alert('휴대폰번호를 정확히 입력해 주세요.'); return; }
+    if (!region) { alert('소속시군은 비워둘 수 없어요.'); return; }
+
+    const updated = {
+      name: name,
+      phone: '010-' + phone1 + '-' + phone2,
+      region: region,
+      consent: entry.consent,
+      remark: remark,
+      pin: entry.pin,
+      programs: result.programs,
+      ts: entry.ts
+    };
+
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      const saveResult = await window.storage.set(key, JSON.stringify(updated), true);
+      if (!saveResult) throw new Error('저장 실패');
+      panel.style.display = 'none';
+      panel.innerHTML = '';
+      loadResults();
+
+    } catch (e) {
+      alert('저장 중 문제가 발생했어요.');
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = '저장';
+    }
+  });
+}
+
+function renderSummary(pairs) {
+  const finalBody = document.getElementById('summary-final-body');
+
+  let finalRows = '';
+  let rowCount = 0;
+
+  pairs.forEach(function(pair) {
+    const key = pair[0];
+    const e = pair[1];
+    const programs = entryPrograms(e);
+    const finalPrograms = programs.filter(function(p) { return parseInt(p.count, 10) >= 2; });
+    const refPrograms = programs.filter(function(p) { return parseInt(p.count, 10) === 1; });
+
+    if (finalPrograms.length === 0 && refPrograms.length === 0) return;
+    rowCount++;
+
+    const buckets = {};
+    ORG_BUCKETS.forEach(function(b) { buckets[b.label] = { names: [], participants: 0 }; });
+    let totalParticipants = 0;
+    let totalRevenue = 0;
+    const orgNames = new Set();
+    let anyEffect = false;
+
+    finalPrograms.forEach(function(p) {
+      const label = bucketForOrgType(p.orgType);
+      if (p.orgName) {
+        buckets[label].names.push(p.orgName);
+        orgNames.add(p.orgName);
+      }
+      const partN = parseInt(p.participants, 10);
+      if (!isNaN(partN)) {
+        buckets[label].participants += partN;
+        totalParticipants += partN;
+      }
+      const revN = parseInt((p.revenue || '').replace(/,/g, ''), 10);
+      if (!isNaN(revN)) totalRevenue += revN;
+      if (p.effect === '예') anyEffect = true;
+    });
+
+    const refNames = [];
+    let refParticipants = 0;
+    refPrograms.forEach(function(p) {
+      if (p.orgName) refNames.push(p.orgName);
+      const partN = parseInt(p.participants, 10);
+      if (!isNaN(partN)) refParticipants += partN;
+    });
+
+    finalRows += '<tr>';
+    finalRows += '<td class="name">' + escapeHtml(e.name) + '</td>';
+    finalRows += '<td>' + escapeHtml(e.phone || '') + '</td>';
+    finalRows += '<td>' + escapeHtml(e.region || '') + '</td>';
+    finalRows += '<td>치유농업사</td>';
+    ORG_BUCKETS.forEach(function(b) {
+      const bucket = buckets[b.label];
+      finalRows += '<td>' + escapeHtml(bucket.names.join(', ')) + '</td>';
+
+      finalRows += '<td style="text-align:center;">' + (bucket.participants || '') + '</td>';
+    });
+    finalRows += '<td style="text-align:center;">' + (orgNames.size || '') + '</td>';
+    finalRows += '<td style="text-align:center;">' + (totalParticipants || '') + '</td>';
+    finalRows += '<td style="text-align:right;">' + (totalRevenue ? totalRevenue.toLocaleString('ko-KR') : '') + '</td>';
+    finalRows += '<td style="text-align:center;">' + (finalPrograms.length ? (anyEffect ? '예' : '아니오') : '') + '</td>';
+    finalRows += '<td>' + escapeHtml(refNames.join(', ')) + '</td>';
+    finalRows += '<td style="text-align:center;">' + (refParticipants || '') + '</td>';
+    finalRows += '<td style="text-align:center; white-space:nowrap;"><button class="edit-row-btn" data-key="' + escapeHtml(key) + '">수정</button> <button class="delete-row-btn" data-key="' + escapeHtml(key) + '">삭제</button></td>';
+    finalRows += '</tr>';
+  });
+
+  finalBody.innerHTML = rowCount ? finalRows : '<tr class="empty-row"><td colspan="21">아직 집계할 실적이 없어요.</td></tr>';
+
+  finalBody.querySelectorAll('.delete-row-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm('이 사람이 등록한 실적 전체를 삭제할까요? 되돌릴 수 없어요.')) return;
+      await deleteEntry(btn.dataset.key);
+      loadResults();
+    });
+  });
+
+  finalBody.querySelectorAll('.edit-row-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      adminEditEntry(btn.dataset.key);
+    });
+  });
+}
+
+async function loadResults() {
+  const countEl = document.getElementById('result-count');
+  countEl.textContent = '불러오는 중…';
+
+  const editPanel = document.getElementById('admin-edit-panel');
+  if (editPanel) { editPanel.style.display = 'none'; editPanel.innerHTML = ''; }
+
+  try {
+    const pairs = await fetchAllEntries();
+    currentEntries = pairs.map(function(p) { return p[1]; });
+    countEl.textContent = pairs.length ? ('총 ' + pairs.length + '명') : '총 0건';
+    renderSimpleSummary(pairs);
+    renderSummary(pairs);
+  } catch (e) {
+    countEl.textContent = '불러오기에 실패했어요. 새로고침을 눌러 주세요.';
+    console.error(e);
+  }
+}
+
+function downloadExcel() {
+  if (!currentEntries.length) {
+    alert('다운로드할 자료가 없어요.');
+    return;
+  }
+  if (typeof XLSX === 'undefined') {
+    alert('엑셀 기능을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+    return;
+  }
+
+  const rows = [];
+  currentEntries.forEach(function(e) {
+    const programs = entryPrograms(e);
+    const countByType = {};
+    programs.forEach(function(p) {
+      const n = parseInt(p.count, 10);
+      if (isNaN(n) || !p.type) return;
+
+      countByType[p.type] = (countByType[p.type] || 0) + n;
+    });
+    programs.forEach(function(p, idx) {
+      rows.push({
+        '성명': e.name || '',
+        '휴대폰번호': e.phone || '',
+        '소속시군': e.region || '',
+        '실적구분': '실적' + (idx + 1),
+        '구분': p.type || '',
+        '기관유형': p.orgType || '',
+        '기관명': p.orgName || '',
+        '활용기간': p.period || '',
+        '운영회차': p.count || '',
+        '참여자수': p.participants || '',
+        '매출액(원)': p.revenue || '',
+        '효과측정여부': p.effect || '',
+        '프로그램 또는 교육명': p.task || '',
+        '치유농업사 자격증 취득연도': e.remark || '',
+        '총 운영회차(채용)': countByType['채용'] || '',
+        '총 운영회차(프로그램 운영)': countByType['프로그램 운영'] || '',
+        '총 운영회차(교육)': countByType['교육'] || ''
+      });
+    });
+  });
+
+  const finalRows = [];
+  currentEntries.forEach(function(e) {
+    const programs = entryPrograms(e);
+    const finalPrograms = programs.filter(function(p) { return parseInt(p.count, 10) >= 2; });
+    const refPrograms = programs.filter(function(p) { return parseInt(p.count, 10) === 1; });
+
+    if (finalPrograms.length === 0 && refPrograms.length === 0) return;
+
+
+    const buckets = {};
+    ORG_BUCKETS.forEach(function(b) { buckets[b.label] = { names: [], participants: 0 }; });
+    let totalParticipants = 0;
+    let totalRevenue = 0;
+    const orgNames = new Set();
+    let anyEffect = false;
+
+    finalPrograms.forEach(function(p) {
+      const label = bucketForOrgType(p.orgType);
+      if (p.orgName) {
+        buckets[label].names.push(p.orgName);
+        orgNames.add(p.orgName);
+      }
+      const partN = parseInt(p.participants, 10);
+      if (!isNaN(partN)) {
+        buckets[label].participants += partN;
+        totalParticipants += partN;
+      }
+      const revN = parseInt((p.revenue || '').replace(/,/g, ''), 10);
+      if (!isNaN(revN)) totalRevenue += revN;
+      if (p.effect === '예') anyEffect = true;
+    });
+
+    const refNames = [];
+    let refParticipants = 0;
+    refPrograms.forEach(function(p) {
+      if (p.orgName) refNames.push(p.orgName);
+      const partN = parseInt(p.participants, 10);
+      if (!isNaN(partN)) refParticipants += partN;
+    });
+
+
+    const row = {
+      '성명': e.name || '',
+      '휴대폰번호': e.phone || '',
+      '소속시군': e.region || '',
+      '구분': '치유농업사'
+    };
+    ORG_BUCKETS.forEach(function(b) {
+      row[b.label + ' 기관명'] = buckets[b.label].names.join(', ');
+      row[b.label + ' 참여자수'] = buckets[b.label].participants || '';
+    });
+    row['유관기관개수'] = orgNames.size || '';
+    row['참여자합계'] = totalParticipants || '';
+    row['매출액(원)'] = totalRevenue || '';
+    row['효과측정여부'] = finalPrograms.length ? (anyEffect ? '예' : '아니오') : '';
+    row['1회실적 기관명(참고용)'] = refNames.join(', ');
+    row['1회실적 참여자수(참고용)'] = refParticipants || '';
+    finalRows.push(row);
+  });
+
+  const simpleRows = [];
+  currentEntries.forEach(function(e) {
+    entryPrograms(e).forEach(function(p) {
+      simpleRows.push({
+        '시군': e.region || '',
+        '성명': e.name || '',
+        '구분': p.type || '',
+        '활용기간': p.period || '',
+        '프로그램 또는 교육명': p.task || '',
+        '치유농업사 취득연도': e.remark || ''
+      });
+    });
+  });
+
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '활용실적');
+
+  const wsSimple = XLSX.utils.json_to_sheet(simpleRows.length ? simpleRows : [{ '안내': '아직 입력된 실적이 없어요.' }]);
+  XLSX.utils.book_append_sheet(wb, wsSimple, '치유농업사_활용실적');
+
+  const wsFinal = XLSX.utils.json_to_sheet(finalRows.length ? finalRows : [{ '안내': '아직 집계할 실적이 없어요.' }]);
+  XLSX.utils.book_append_sheet(wb, wsFinal, '집계표');
+
+  const today = new Date();
+  const stamp = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
+  XLSX.writeFile(wb, '치유농업사_활용실적_' + stamp + '.xlsx');
+}
+</script>
+</body>
+</html>

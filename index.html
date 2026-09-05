@@ -441,13 +441,14 @@
                 <th style="width:80px;">성명</th>
                 <th style="width:100px;">구분</th>
                 <th style="width:110px;">활용기간</th>
+                <th style="width:70px;">운영회차</th>
                 <th>프로그램 또는 교육명</th>
                 <th style="width:90px;">치유농업사<br>취득연도</th>
                 <th style="width:100px;">관리</th>
               </tr>
             </thead>
             <tbody id="simple-summary-body">
-              <tr class="empty-row"><td colspan="7">불러오는 중…</td></tr>
+              <tr class="empty-row"><td colspan="8">불러오는 중…</td></tr>
             </tbody>
           </table>
         </div>
@@ -573,11 +574,14 @@ function escapeHtml(s) {
 }
 
 function formatDateMask(digits) {
-  digits = digits.slice(0, 8);
-  let out = digits.slice(0, 4);
-  if (digits.length > 4) out += '-' + digits.slice(4, 6);
-  if (digits.length > 6) out += '-' + digits.slice(6, 8);
+  digits = digits.slice(0, 4);
+  let out = digits.slice(0, 2);
+  if (digits.length > 2) out += '-' + digits.slice(2, 4);
   return out;
+}
+
+function stripYearPrefix(s) {
+  return (s || '').replace(/^2026-/, '');
 }
 
 function attachDateMask(input) {
@@ -616,9 +620,13 @@ function makeBlockHTML(idx, data) {
       '<input type="text" class="p-orgname" value="' + escapeHtml(data.orgName || '') + '" placeholder="예: OO초등학교, OO요양원">' +
     '</div>' +
     '<div class="field"><label>활용기간</label><div class="period-row">' +
-      '<input type="text" class="p-start" inputmode="numeric" maxlength="10" value="' + escapeHtml(data.start || '') + '" placeholder="2026-03-01">' +
+      '<input type="text" value="2026" disabled class="phone-fixed" style="max-width:60px;">' +
+      '<span>-</span>' +
+      '<input type="text" class="p-start" inputmode="numeric" maxlength="5" value="' + escapeHtml(data.startMD || '') + '" placeholder="03-01">' +
       '<span>~</span>' +
-      '<input type="text" class="p-end" inputmode="numeric" maxlength="10" value="' + escapeHtml(data.end || '') + '" placeholder="2026-08-31">' +
+      '<input type="text" value="2026" disabled class="phone-fixed" style="max-width:60px;">' +
+      '<span>-</span>' +
+      '<input type="text" class="p-end" inputmode="numeric" maxlength="5" value="' + escapeHtml(data.endMD || '') + '" placeholder="08-31">' +
     '</div></div>' +
     '<div class="field"><label>운영회차</label><div class="period-row" style="max-width:140px;">' +
       '<input type="text" class="p-count" inputmode="numeric" maxlength="4" value="' + escapeHtml(data.count || '') + '" placeholder="예: 12">' +
@@ -729,8 +737,10 @@ function readBlocks(container, forceAll) {
     const orgType = orgSel ? orgSel.dataset.value : '';
     const orgNameEl = b.querySelector('.p-orgname');
     const orgName = orgNameEl.value.trim();
-    const start = b.querySelector('.p-start').value.trim();
-    const end = b.querySelector('.p-end').value.trim();
+    const startMD = b.querySelector('.p-start').value.trim();
+    const endMD = b.querySelector('.p-end').value.trim();
+    const start = startMD ? '2026-' + startMD : '';
+    const end = endMD ? '2026-' + endMD : '';
     const period = start || end ? (start + (end ? ' ~ ' + end : '')) : '';
     const count = b.querySelector('.p-count').value.trim();
     const participants = b.querySelector('.p-participants').value.trim();
@@ -963,7 +973,7 @@ function renderMine(pairs) {
     const programs = (e.programs && e.programs.length) ? e.programs : [{ task: e.task || '', type: e.type || '', period: e.period || '' }];
     programs.forEach(function(p) {
       const parts = (p.period || '').split(' ~ ');
-      addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', start: parts[0] || '', end: parts[1] || '', count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
+      addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', startMD: stripYearPrefix(parts[0]), endMD: stripYearPrefix(parts[1]), count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
     });
 
     card.querySelector('.m-e-add').addEventListener('click', function() {
@@ -1099,6 +1109,7 @@ function renderSimpleSummary(pairs) {
       rowsHtml += '<td class="name">' + escapeHtml(e.name) + '</td>';
       rowsHtml += '<td>' + escapeHtml(p.type || '') + '</td>';
       rowsHtml += '<td>' + escapeHtml(p.period || '') + '</td>';
+      rowsHtml += '<td style="text-align:center;">' + (p.count ? escapeHtml(p.count) + '회' : '') + '</td>';
       rowsHtml += '<td>' + escapeHtml(p.task || '').replace(/\n/g, '<br>') + '</td>';
       rowsHtml += '<td style="text-align:center;">' + escapeHtml(e.remark || '') + '</td>';
       rowsHtml += '<td style="text-align:center; white-space:nowrap;"><button class="edit-row-btn" data-key="' + escapeHtml(key) + '">수정</button> <button class="delete-row-btn" data-key="' + escapeHtml(key) + '" data-idx="' + idx + '">삭제</button></td>';
@@ -1106,7 +1117,7 @@ function renderSimpleSummary(pairs) {
     });
   });
 
-  body.innerHTML = count ? rowsHtml : '<tr class="empty-row"><td colspan="7">아직 입력된 실적이 없어요.</td></tr>';
+  body.innerHTML = count ? rowsHtml : '<tr class="empty-row"><td colspan="8">아직 입력된 실적이 없어요.</td></tr>';
 
   body.querySelectorAll('.delete-row-btn').forEach(function(btn) {
     btn.addEventListener('click', async function() {
@@ -1195,7 +1206,7 @@ async function adminEditEntry(key) {
   const blocksContainer = card.querySelector('.ae-blocks');
   entryPrograms(entry).forEach(function(p) {
     const parts = (p.period || '').split(' ~ ');
-    addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', start: parts[0] || '', end: parts[1] || '', count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
+    addBlock(blocksContainer, { task: p.task, type: p.type, orgType: p.orgType || '', orgName: p.orgName || '', startMD: stripYearPrefix(parts[0]), endMD: stripYearPrefix(parts[1]), count: p.count || '', participants: p.participants || '', revenue: p.revenue || '', effect: p.effect || '' });
   });
   card.querySelector('.ae-add').addEventListener('click', function() {
     addBlock(blocksContainer);
@@ -1454,6 +1465,7 @@ function downloadExcel() {
         '성명': e.name || '',
         '구분': p.type || '',
         '활용기간': p.period || '',
+        '운영회차': p.count || '',
         '프로그램 또는 교육명': p.task || '',
         '치유농업사 취득연도': e.remark || ''
       });

@@ -149,7 +149,7 @@
 
   .phone-row { display: flex; align-items: center; gap: 8px; }
   .phone-row input { flex: 1; text-align: center; }
-  .phone-row input.phone-fixed { flex: 0.8; background: #F3E2A6; color: var(--ink-soft); font-weight: 600; }
+  .phone-row input.phone-fixed, input.phone-fixed { flex: 0.8; background: #F3E2A6; color: var(--ink-soft); font-weight: 600; }
   .phone-row span { color: var(--ink-soft); font-size: 13px; }
 
   .choice-row { display: flex; gap: 8px; }
@@ -511,8 +511,15 @@ const firebaseConfig = {
   appId: "1:960685767852:web:f974fe265184b7f7cbb309",
   measurementId: "G-N7KDGZSYFS"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let db = null;
+let firebaseLoadError = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch (e) {
+  firebaseLoadError = true;
+  console.error('Firebase 초기화 실패 (네트워크에서 구글 도메인이 막혀 있을 수 있어요):', e);
+}
 const COLLECTION = 'entries';
 
 const storage = {
@@ -811,6 +818,13 @@ function readBlocks(container, forceAll) {
 
 const fBlocksContainer = document.getElementById('f-blocks');
 addBlock(fBlocksContainer);
+
+if (firebaseLoadError) {
+  const warn = document.createElement('div');
+  warn.style.cssText = 'background:#C1443B; color:#fff; padding:14px 16px; border-radius:8px; margin-bottom:16px; font-size:14px; font-weight:600; line-height:1.6;';
+  warn.textContent = '⚠ 저장 기능을 불러오지 못했어요. 지금 사용 중인 네트워크(회사망, 공공기관망 등)가 외부 서비스 접속을 막고 있을 수 있어요. 와이파이를 끄고 휴대폰 데이터로 접속하거나 다른 네트워크에서 다시 시도해 주세요.';
+  document.querySelector('.wrap').insertBefore(warn, document.querySelector('.masthead'));
+}
 
 document.getElementById('add-block-btn').addEventListener('click', function() {
   addBlock(fBlocksContainer);

@@ -584,10 +584,29 @@ function stripYearPrefix(s) {
   return (s || '').replace(/^2026-/, '');
 }
 
-function attachDateMask(input) {
+function isValidMonthDay(mmdd) {
+  const m = mmdd.match(/^(\d{2})-(\d{2})$/);
+  if (!m) return false;
+  const month = parseInt(m[1], 10);
+  const day = parseInt(m[2], 10);
+  if (month < 1 || month > 12) return false;
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (day < 1 || day > daysInMonth[month - 1]) return false;
+  return true;
+}
+
+function attachDateMask(input, errorEl) {
   input.addEventListener('input', function() {
     const digits = input.value.replace(/[^0-9]/g, '');
     input.value = formatDateMask(digits);
+    if (input.value.length === 5) {
+      const valid = isValidMonthDay(input.value);
+      markInvalid(input, !valid);
+      if (errorEl) errorEl.style.display = valid ? 'none' : 'block';
+    } else {
+      markInvalid(input, false);
+      if (errorEl) errorEl.style.display = 'none';
+    }
   });
 }
 
@@ -627,7 +646,9 @@ function makeBlockHTML(idx, data) {
       '<input type="text" value="2026" disabled class="phone-fixed" style="max-width:60px;">' +
       '<span>-</span>' +
       '<input type="text" class="p-end" inputmode="numeric" maxlength="5" value="' + escapeHtml(data.endMD || '') + '" placeholder="08-31">' +
-    '</div></div>' +
+    '</div>' +
+    '<p class="error p-date-error">날짜가 올바르지 않아요. 월은 01~12, 일은 해당 월의 실제 날짜여야 해요.</p>' +
+    '</div>' +
     '<div class="field"><label>운영회차</label><div class="period-row" style="max-width:140px;">' +
       '<input type="text" class="p-count" inputmode="numeric" maxlength="4" value="' + escapeHtml(data.count || '') + '" placeholder="예: 12">' +
       '<span>회</span>' +
@@ -673,8 +694,9 @@ function addBlock(container, data) {
   orgNameInput.addEventListener('input', function() {
     markInvalid(orgNameInput, false);
   });
-  attachDateMask(block.querySelector('.p-start'));
-  attachDateMask(block.querySelector('.p-end'));
+  const dateErrorEl = block.querySelector('.p-date-error');
+  attachDateMask(block.querySelector('.p-start'), dateErrorEl);
+  attachDateMask(block.querySelector('.p-end'), dateErrorEl);
   const countInput = block.querySelector('.p-count');
   countInput.addEventListener('input', function() {
     countInput.value = countInput.value.replace(/[^0-9]/g, '');
@@ -756,19 +778,32 @@ function readBlocks(container, forceAll) {
       markInvalid(orgGroup, false, 'invalid-group');
       markInvalid(orgNameEl, false);
       markInvalid(effectGroup, false, 'invalid-group');
+      markInvalid(b.querySelector('.p-start'), false);
+      markInvalid(b.querySelector('.p-end'), false);
+      const untouchedDateError = b.querySelector('.p-date-error');
+      if (untouchedDateError) untouchedDateError.style.display = 'none';
       b.classList.remove('invalid-block');
       return;
     }
 
     const missing = !task || !type || !orgType || !orgName || !effect;
+    const startEl = b.querySelector('.p-start');
+    const endEl = b.querySelector('.p-end');
+    const dateErrorEl = b.querySelector('.p-date-error');
+    const startBad = startMD && !isValidMonthDay(startMD);
+    const endBad = endMD && !isValidMonthDay(endMD);
+    markInvalid(startEl, startBad);
+    markInvalid(endEl, endBad);
+    if (dateErrorEl) dateErrorEl.style.display = (startBad || endBad) ? 'block' : 'none';
+    const invalid = missing || startBad || endBad;
     markInvalid(taskEl, !task);
     markInvalid(typeGroup, !type, 'invalid-group');
     markInvalid(orgGroup, !orgType, 'invalid-group');
     markInvalid(orgNameEl, !orgName);
     markInvalid(effectGroup, !effect, 'invalid-group');
-    b.classList.toggle('invalid-block', missing);
+    b.classList.toggle('invalid-block', invalid);
 
-    if (missing) { hasError = true; return; }
+    if (invalid) { hasError = true; return; }
     programs.push({ task: task, type: type, orgType: orgType, orgName: orgName, period: period, count: count, participants: participants, revenue: revenue, effect: effect });
   });
   return { programs: programs, hasError: hasError };

@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Serif+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --soil: #8A6D1F;
@@ -32,7 +32,6 @@
   }
   .wrap { max-width: 620px; margin: 0 auto; }
   .wrap-wide { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-
   .cta-banner {
     background: #F9D9D3;
     color: #8A2E1F;
@@ -65,7 +64,6 @@
   }
   .masthead p {
     margin: 0;
-
     font-size: 14px;
     color: var(--ink-soft);
     line-height: 1.6;
@@ -98,7 +96,6 @@
   .sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
   .sub-tab {
     padding: 8px 14px;
-
     border: 1px solid var(--line);
     border-radius: 6px;
     font-size: 12px;
@@ -131,7 +128,6 @@
     color: var(--soil-dark);
     margin-bottom: 6px;
   }
-
   input[type=text], input[type=password], textarea, select {
     width: 100%;
     padding: 10px 12px;
@@ -164,7 +160,6 @@
     text-align: center;
     padding: 10px 6px;
     border: 1.5px solid var(--line);
-
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
@@ -197,7 +192,6 @@
     color: #fff;
     border: none;
     border-radius: 7px;
-
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -230,7 +224,6 @@
   .toolbar {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 14px;
-
   }
   .toolbar .count { font-size: 13px; color: var(--ink-soft); }
   .refresh-btn {
@@ -263,7 +256,6 @@
   td.name { font-weight: 600; white-space: nowrap; }
   td.remark { text-align: center; color: var(--gold); font-weight: 600; }
   .table-wrap { overflow-x: auto; border-radius: 8px; }
-
   .empty-row td {
     text-align: center;
     color: var(--ink-soft);
@@ -296,7 +288,6 @@
     background: var(--soil);
     font-weight: 700;
     margin: 0 -16px 14px;
-
     padding: 8px 16px;
     border-radius: 8px 8px 0 0;
   }
@@ -361,7 +352,6 @@
           <input type="text" id="f-phone-1" inputmode="numeric" maxlength="4" placeholder="1234">
           <span>-</span>
           <input type="text" id="f-phone-2" inputmode="numeric" maxlength="4" placeholder="5678">
-
         </div>
         <p class="error" id="err-phone">휴대폰번호를 정확히 입력해 주세요.</p>
       </div>
@@ -394,7 +384,6 @@
       </div>
 
       <div class="field">
-
         <label>수정용 비밀번호</label>
         <input type="password" id="f-pin" placeholder="나중에 내 항목을 조회·수정할 때 쓸 비밀번호 (4자 이상)">
         <p class="pin-hint">잊지 않게 기억해 두세요. 성명 + 이 비밀번호로만 본인 항목을 확인·수정할 수 있어요.</p>
@@ -459,7 +448,6 @@
         <div class="table-wrap" style="margin-bottom:28px;">
           <table id="simple-summary-table">
             <thead>
-
               <tr>
                 <th style="width:80px;">시군</th>
                 <th style="width:80px;">성명</th>
@@ -492,7 +480,6 @@
                 <th colspan="2" style="background:#D6D0EC; color:var(--soil-dark);">장애인관련 유관기관</th>
                 <th colspan="2" style="background:#CFE6D2; color:var(--soil-dark);">정신건강관련 유관기관</th>
                 <th colspan="2" style="background:#E4E0D6; color:var(--soil-dark);">학생, 노인, 장애인, 정신건강<br>외 유관기관의 합</th>
-
                 <th colspan="4" style="background:#C1443B;">❷ 최종성과<br>(2회이상 실적 포함)</th>
                 <th colspan="2" style="background:#F4B8C6; color:var(--soil-dark);">(참고용 조사자료)<br>1회 프로그램 운영 실적</th>
                 <th rowspan="2" style="width:100px;">관리</th>
@@ -527,40 +514,62 @@
 </div>
 
 <script>
-// ---- Firebase 설정: 아래 값을 Firebase 콘솔 > 프로젝트 설정 > 내 앱 에서 복사해 붙여넣으세요 ----
 const firebaseConfig = {
   apiKey: "AIzaSyAXlsiUFHSL7G76V2XY7A3zMif-CbILNXA",
   authDomain: "cldbshddjq.firebaseapp.com",
   projectId: "cldbshddjq",
   storageBucket: "cldbshddjq.firebasestorage.app",
   messagingSenderId: "960685767852",
-  appId: "1:960685767852:web:a8410c1eee4fc5aacbb309"
+  appId: "1:960685767852:web:f974fe265184b7f7cbb309",
+  measurementId: "G-N7KDGZSYFS"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const COLLECTION = 'entries';
 
-// ---- window.storage 어댑터: 기존 코드는 전혀 건드리지 않고, Claude 아티팩트 전용 저장소 API를
-// 동일한 이름/모양으로 Firestore 위에 재구현합니다. entries 컬렉션에 문서 1건 = 응답 1건. ----
-window.storage = {
-  async list(prefix, apply) {
-    const snap = await db.collection('entries').get();
-    return { keys: snap.docs.map(function(d) { return 'entry:' + d.id; }) };
+const storage = {
+  async set(key, value) {
+    try {
+      await db.collection(COLLECTION).doc(key).set({ value: value });
+      return { key: key, value: value, shared: true };
+    } catch (e) {
+      console.error('storage.set error', e);
+      return null;
+    }
   },
-  async get(key, apply) {
-    const id = key.replace(/^entry:/, '');
-    const doc = await db.collection('entries').doc(id).get();
-    if (!doc.exists) return null;
-    return { value: JSON.stringify(doc.data()) };
+  async get(key) {
+    try {
+      const doc = await db.collection(COLLECTION).doc(key).get();
+      if (!doc.exists) return null;
+      return { key: key, value: doc.data().value, shared: true };
+    } catch (e) {
+      console.error('storage.get error', e);
+      return null;
+    }
   },
-  async set(key, value, apply) {
-    const id = key.replace(/^entry:/, '');
-    await db.collection('entries').doc(id).set(JSON.parse(value));
-    return true;
+  async delete(key) {
+    try {
+      await db.collection(COLLECTION).doc(key).delete();
+      return { key: key, deleted: true, shared: true };
+    } catch (e) {
+      console.error('storage.delete error', e);
+      return null;
+    }
   },
-  async delete(key, apply) {
-    const id = key.replace(/^entry:/, '');
-    await db.collection('entries').doc(id).delete();
-    return true;
+  async list(prefix) {
+    try {
+      const end = prefix + '\uf8ff';
+      const snap = await db.collection(COLLECTION)
+        .where(firebase.firestore.FieldPath.documentId(), '>=', prefix)
+        .where(firebase.firestore.FieldPath.documentId(), '<', end)
+        .get();
+      const keys = [];
+      snap.forEach(function(doc) { keys.push(doc.id); });
+      return { keys: keys, prefix: prefix, shared: true };
+    } catch (e) {
+      console.error('storage.list error', e);
+      return { keys: [], prefix: prefix, shared: true };
+    }
   }
 };
 
@@ -594,7 +603,6 @@ function attachDateMask(input) {
 function makeBlockHTML(idx, data) {
   data = data || {};
   const types = ['채용', '프로그램 운영', '교육'];
-
   const orgTypes = ['학생관련 유관기관', '노인관련 유관기관', '장애인관련 유관기관', '정신건강관련 유관기관', '그외 유관기관', '시군농업기술센터'];
   return '<div class="program-block" data-idx="' + idx + '">' +
     '<div class="block-title">활동실적</div>' +
@@ -627,7 +635,6 @@ function makeBlockHTML(idx, data) {
     '</div></div>' +
     '<div class="field"><label>운영회차</label><div class="period-row" style="max-width:140px;">' +
       '<input type="text" class="p-count" inputmode="numeric" maxlength="4" value="' + escapeHtml(data.count || '') + '" placeholder="예: 12">' +
-
       '<span>회</span>' +
     '</div></div>' +
     '<div class="field"><label>참여자수 <span style="font-weight:400; color:var(--ink-soft);">(예시 : 7명 x 5회기 = 35명)</span></label><div class="period-row" style="max-width:140px;">' +
@@ -660,7 +667,6 @@ function addBlock(container, data) {
   blockCounter++;
   const wrapper = document.createElement('div');
   wrapper.innerHTML = makeBlockHTML(blockCounter, data);
-
   const block = wrapper.firstElementChild;
   container.appendChild(block);
 
@@ -693,7 +699,6 @@ function addBlock(container, data) {
       typeGroup.querySelectorAll('.choice').forEach(function(c) { c.classList.remove('selected'); });
       el.classList.add('selected');
       markInvalid(typeGroup, false, 'invalid-group');
-
     });
   });
   const orgGroup = block.querySelector('.p-org');
@@ -726,7 +731,6 @@ function readBlocks(container, forceAll) {
   const blocks = Array.from(container.querySelectorAll('.program-block'));
   const programs = [];
   let hasError = false;
-
   blocks.forEach(function(b) {
     const taskEl = b.querySelector('.p-task');
     const task = taskEl.value.trim();
@@ -791,7 +795,6 @@ document.querySelectorAll('#f-remark .choice').forEach(function(el) {
 
 document.querySelectorAll('#f-consent .choice').forEach(function(el) {
   el.addEventListener('click', function() {
-
     document.querySelectorAll('#f-consent .choice').forEach(function(c) { c.classList.remove('selected'); });
     el.classList.add('selected');
     selectedConsent = el.dataset.value;
@@ -819,13 +822,12 @@ function showError(id) { document.getElementById(id).style.display = 'block'; }
 function hideError(id) { document.getElementById(id).style.display = 'none'; }
 
 async function fetchAllEntries() {
-  const list = await window.storage.list('entry:', true);
+  const list = await storage.list('entry:');
   const keys = (list && list.keys) ? list.keys : [];
   const pairs = [];
   for (const key of keys) {
     try {
-
-      const r = await window.storage.get(key, true);
+      const r = await storage.get(key);
       if (r && r.value) pairs.push([key, JSON.parse(r.value)]);
     } catch (e) {}
   }
@@ -857,7 +859,6 @@ document.getElementById('submit-btn').addEventListener('click', async function()
 
   const regionBad = !region;
   if (regionBad) { showError('err-region'); ok = false; } else { hideError('err-region'); }
-
   markInvalid(document.getElementById('f-region'), regionBad);
 
   const remarkBad = !selectedRemark;
@@ -890,13 +891,12 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   };
 
   const btn = document.getElementById('submit-btn');
-
   btn.disabled = true;
   btn.textContent = '제출 중…';
 
   try {
     const key = 'entry:' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-    const saveResult = await window.storage.set(key, JSON.stringify(entry), true);
+    const saveResult = await storage.set(key, JSON.stringify(entry), true);
     if (!saveResult) throw new Error('저장 실패');
     document.getElementById('form-card').style.display = 'none';
     document.getElementById('thanks-card').style.display = 'block';
@@ -923,7 +923,6 @@ document.getElementById('again-btn').addEventListener('click', function() {
   document.querySelectorAll('#f-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
   document.querySelectorAll('#f-consent .choice').forEach(function(c) { c.classList.remove('selected'); });
   ['f-name', 'f-region', 'f-pin', 'f-phone-1', 'f-phone-2'].forEach(function(id) {
-
     markInvalid(document.getElementById(id), false);
   });
   markInvalid(document.getElementById('f-remark'), false, 'invalid-group');
@@ -956,7 +955,6 @@ document.getElementById('mine-lookup-btn').addEventListener('click', async funct
   } catch (e) {
     alert('조회 중 문제가 발생했어요.');
     console.error(e);
-
   } finally {
     btn.disabled = false;
     btn.textContent = '내 항목 조회';
@@ -989,7 +987,6 @@ function renderMine(pairs) {
         }).join('') +
       '</div></div>' +
       '<div class="m-e-blocks"></div>' +
-
       '<button type="button" class="add-block-btn m-e-add">+ 활동실적 추가</button>' +
       '<button class="btn m-e-save" style="margin-top:6px;">수정 저장</button>';
 
@@ -1022,7 +1019,6 @@ function renderMine(pairs) {
     card.querySelector('.m-e-save').addEventListener('click', async function() {
       const name = card.querySelector('.m-e-name').value.trim();
       const phone1 = card.querySelector('.m-e-phone-1').value.trim();
-
       const phone2 = card.querySelector('.m-e-phone-2').value.trim();
       const region = card.querySelector('.m-e-region').value.trim();
       const remarkSel = card.querySelector('.m-e-remark .choice.selected');
@@ -1055,7 +1051,6 @@ function renderMine(pairs) {
         consent: e.consent,
         remark: remark,
         pin: e.pin,
-
         programs: result.programs,
         ts: e.ts
       };
@@ -1064,7 +1059,7 @@ function renderMine(pairs) {
       btn.disabled = true;
       btn.textContent = '저장 중…';
       try {
-        const saveResult = await window.storage.set(key, JSON.stringify(updated), true);
+        const saveResult = await storage.set(key, JSON.stringify(updated), true);
         if (!saveResult) throw new Error('저장 실패');
         btn.textContent = '저장됐어요';
         setTimeout(function() { btn.textContent = '수정 저장'; btn.disabled = false; }, 1500);
@@ -1152,7 +1147,6 @@ function renderSimpleSummary(pairs) {
     const programs = entryPrograms(e);
     programs.forEach(function(p, idx) {
       count++;
-
       rowsHtml += '<tr>';
       rowsHtml += '<td>' + escapeHtml(e.region || '') + '</td>';
       rowsHtml += '<td class="name">' + escapeHtml(e.name) + '</td>';
@@ -1184,17 +1178,16 @@ function renderSimpleSummary(pairs) {
 
 async function deleteProgramFromEntry(key, idx) {
   try {
-    const r = await window.storage.get(key, true);
-
+    const r = await storage.get(key);
     if (!r || !r.value) return;
     const entry = JSON.parse(r.value);
     const programs = entryPrograms(entry).slice();
     programs.splice(idx, 1);
     if (programs.length === 0) {
-      await window.storage.delete(key, true);
+      await storage.delete(key);
     } else {
       entry.programs = programs;
-      await window.storage.set(key, JSON.stringify(entry), true);
+      await storage.set(key, JSON.stringify(entry), true);
     }
   } catch (e) {
     alert('삭제 중 문제가 발생했어요.');
@@ -1204,7 +1197,7 @@ async function deleteProgramFromEntry(key, idx) {
 
 async function deleteEntry(key) {
   try {
-    await window.storage.delete(key, true);
+    await storage.delete(key);
   } catch (e) {
     alert('삭제 중 문제가 발생했어요.');
     console.error(e);
@@ -1218,9 +1211,8 @@ async function adminEditEntry(key) {
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   let entry;
-
   try {
-    const r = await window.storage.get(key, true);
+    const r = await storage.get(key);
     if (!r || !r.value) { panel.innerHTML = '<div class="card">항목을 찾을 수 없어요.</div>'; return; }
     entry = JSON.parse(r.value);
   } catch (e) {
@@ -1251,7 +1243,6 @@ async function adminEditEntry(key) {
     '<div class="btn-row"><button class="btn ae-cancel" style="background:#fff; border:1px solid var(--line); color:var(--ink-soft);">취소</button><button class="btn ae-save">저장</button></div>';
 
   panel.innerHTML = '';
-
   panel.appendChild(card);
 
   card.querySelectorAll('.ae-phone-1, .ae-phone-2').forEach(function(el) {
@@ -1284,7 +1275,6 @@ async function adminEditEntry(key) {
     const name = card.querySelector('.ae-name').value.trim();
     const phone1 = card.querySelector('.ae-phone-1').value.trim();
     const phone2 = card.querySelector('.ae-phone-2').value.trim();
-
     const region = card.querySelector('.ae-region').value.trim();
     const remarkSel = card.querySelector('.ae-remark .choice.selected');
     const remark = remarkSel ? remarkSel.dataset.value : '';
@@ -1312,12 +1302,11 @@ async function adminEditEntry(key) {
     btn.disabled = true;
     btn.textContent = '저장 중…';
     try {
-      const saveResult = await window.storage.set(key, JSON.stringify(updated), true);
+      const saveResult = await storage.set(key, JSON.stringify(updated), true);
       if (!saveResult) throw new Error('저장 실패');
       panel.style.display = 'none';
       panel.innerHTML = '';
       loadResults();
-
     } catch (e) {
       alert('저장 중 문제가 발생했어요.');
       console.error(e);
@@ -1382,7 +1371,6 @@ function renderSummary(pairs) {
     ORG_BUCKETS.forEach(function(b) {
       const bucket = buckets[b.label];
       finalRows += '<td>' + escapeHtml(bucket.names.join(', ')) + '</td>';
-
       finalRows += '<td style="text-align:center;">' + (bucket.participants || '') + '</td>';
     });
     finalRows += '<td style="text-align:center;">' + (orgNames.size || '') + '</td>';
@@ -1415,7 +1403,6 @@ function renderSummary(pairs) {
 async function loadResults() {
   const countEl = document.getElementById('result-count');
   countEl.textContent = '불러오는 중…';
-
   const editPanel = document.getElementById('admin-edit-panel');
   if (editPanel) { editPanel.style.display = 'none'; editPanel.innerHTML = ''; }
 
@@ -1448,7 +1435,6 @@ function downloadExcel() {
     programs.forEach(function(p) {
       const n = parseInt(p.count, 10);
       if (isNaN(n) || !p.type) return;
-
       countByType[p.type] = (countByType[p.type] || 0) + n;
     });
     programs.forEach(function(p, idx) {
@@ -1482,7 +1468,6 @@ function downloadExcel() {
 
     if (finalPrograms.length === 0 && refPrograms.length === 0) return;
 
-
     const buckets = {};
     ORG_BUCKETS.forEach(function(b) { buckets[b.label] = { names: [], participants: 0 }; });
     let totalParticipants = 0;
@@ -1513,7 +1498,6 @@ function downloadExcel() {
       const partN = parseInt(p.participants, 10);
       if (!isNaN(partN)) refParticipants += partN;
     });
-
 
     const row = {
       '성명': e.name || '',
@@ -1547,7 +1531,6 @@ function downloadExcel() {
       });
     });
   });
-
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];

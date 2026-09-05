@@ -345,18 +345,6 @@
       </div>
 
       <div class="field">
-        <label>휴대폰번호</label>
-        <div class="phone-row">
-          <input type="text" value="010" disabled class="phone-fixed">
-          <span>-</span>
-          <input type="text" id="f-phone-1" inputmode="numeric" maxlength="4" placeholder="1234">
-          <span>-</span>
-          <input type="text" id="f-phone-2" inputmode="numeric" maxlength="4" placeholder="5678">
-        </div>
-        <p class="error" id="err-phone">휴대폰번호를 정확히 입력해 주세요.</p>
-      </div>
-
-      <div class="field">
         <label>소속시군</label>
         <input type="text" id="f-region" placeholder="예: OO시 / OO군">
         <p class="error" id="err-region">소속시군을 입력해 주세요.</p>
@@ -472,7 +460,6 @@
             <thead>
               <tr>
                 <th rowspan="2" style="width:60px;">성명</th>
-                <th rowspan="2" style="width:100px;">휴대폰번호</th>
                 <th rowspan="2" style="width:70px;">소속시군</th>
                 <th rowspan="2" style="width:60px;">구분</th>
                 <th colspan="2" style="background:#FBE7A1; color:var(--soil-dark);">학생관련 유관기관</th>
@@ -504,7 +491,7 @@
               </tr>
             </thead>
             <tbody id="summary-final-body">
-              <tr class="empty-row"><td colspan="21">불러오는 중…</td></tr>
+              <tr class="empty-row"><td colspan="20">불러오는 중…</td></tr>
             </tbody>
           </table>
         </div>
@@ -803,15 +790,6 @@ document.querySelectorAll('#f-consent .choice').forEach(function(el) {
   });
 });
 
-['f-phone-1', 'f-phone-2'].forEach(function(id) {
-  const el = document.getElementById(id);
-  el.addEventListener('input', function() {
-    el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
-    markInvalid(document.getElementById('f-phone-1'), false);
-    markInvalid(document.getElementById('f-phone-2'), false);
-  });
-});
-
 ['f-name', 'f-region', 'f-pin'].forEach(function(id) {
   document.getElementById(id).addEventListener('input', function() {
     markInvalid(this, false);
@@ -843,19 +821,12 @@ function markInvalid(el, bad, cls) {
 document.getElementById('submit-btn').addEventListener('click', async function() {
   const name = document.getElementById('f-name').value.trim();
   const region = document.getElementById('f-region').value.trim();
-  const phone1 = document.getElementById('f-phone-1').value.trim();
-  const phone2 = document.getElementById('f-phone-2').value.trim();
   const pin = document.getElementById('f-pin').value.trim();
 
   let ok = true;
   const nameBad = !name;
   if (nameBad) { showError('err-name'); ok = false; } else { hideError('err-name'); }
   markInvalid(document.getElementById('f-name'), nameBad);
-
-  const phoneBad = phone1.length !== 4 || phone2.length !== 4;
-  if (phoneBad) { showError('err-phone'); ok = false; } else { hideError('err-phone'); }
-  markInvalid(document.getElementById('f-phone-1'), phoneBad);
-  markInvalid(document.getElementById('f-phone-2'), phoneBad);
 
   const regionBad = !region;
   if (regionBad) { showError('err-region'); ok = false; } else { hideError('err-region'); }
@@ -881,7 +852,6 @@ document.getElementById('submit-btn').addEventListener('click', async function()
 
   const entry = {
     name: name,
-    phone: '010-' + phone1 + '-' + phone2,
     region: region,
     consent: selectedConsent,
     remark: selectedRemark || '',
@@ -913,16 +883,13 @@ document.getElementById('again-btn').addEventListener('click', function() {
   document.getElementById('f-name').value = '';
   document.getElementById('f-region').value = '';
   document.getElementById('f-pin').value = '';
-  document.getElementById('f-phone-1').value = '';
-  document.getElementById('f-phone-2').value = '';
   hideError('err-pin');
   hideError('err-name');
   hideError('err-region');
-  hideError('err-phone');
   hideError('err-consent');
   document.querySelectorAll('#f-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
   document.querySelectorAll('#f-consent .choice').forEach(function(c) { c.classList.remove('selected'); });
-  ['f-name', 'f-region', 'f-pin', 'f-phone-1', 'f-phone-2'].forEach(function(id) {
+  ['f-name', 'f-region', 'f-pin'].forEach(function(id) {
     markInvalid(document.getElementById(id), false);
   });
   markInvalid(document.getElementById('f-remark'), false, 'invalid-group');
@@ -973,13 +940,6 @@ function renderMine(pairs) {
 
     card.innerHTML =
       '<div class="field"><label>성명</label><input type="text" class="m-e-name" value="' + escapeHtml(e.name) + '"></div>' +
-      '<div class="field"><label>휴대폰번호</label><div class="phone-row">' +
-        '<input type="text" value="010" disabled class="phone-fixed">' +
-        '<span>-</span>' +
-        '<input type="text" class="m-e-phone-1" inputmode="numeric" maxlength="4" value="' + escapeHtml((e.phone || '').split('-')[1] || '') + '">' +
-        '<span>-</span>' +
-        '<input type="text" class="m-e-phone-2" inputmode="numeric" maxlength="4" value="' + escapeHtml((e.phone || '').split('-')[2] || '') + '">' +
-      '</div></div>' +
       '<div class="field"><label>소속시군</label><input type="text" class="m-e-region" value="' + escapeHtml(e.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
       '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row m-e-remark">' +
         ['2024','2025','2026'].map(function(y) {
@@ -991,12 +951,6 @@ function renderMine(pairs) {
       '<button class="btn m-e-save" style="margin-top:6px;">수정 저장</button>';
 
     container.appendChild(card);
-
-    card.querySelectorAll('.m-e-phone-1, .m-e-phone-2').forEach(function(el) {
-      el.addEventListener('input', function() {
-        el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
-      });
-    });
 
     card.querySelectorAll('.m-e-remark .choice').forEach(function(el) {
       el.addEventListener('click', function() {
@@ -1018,8 +972,6 @@ function renderMine(pairs) {
 
     card.querySelector('.m-e-save').addEventListener('click', async function() {
       const name = card.querySelector('.m-e-name').value.trim();
-      const phone1 = card.querySelector('.m-e-phone-1').value.trim();
-      const phone2 = card.querySelector('.m-e-phone-2').value.trim();
       const region = card.querySelector('.m-e-region').value.trim();
       const remarkSel = card.querySelector('.m-e-remark .choice.selected');
       const remark = remarkSel ? remarkSel.dataset.value : '';
@@ -1035,10 +987,6 @@ function renderMine(pairs) {
         alert('성명은 비워둘 수 없어요.');
         return;
       }
-      if (phone1.length !== 4 || phone2.length !== 4) {
-        alert('휴대폰번호를 정확히 입력해 주세요.');
-        return;
-      }
       if (!region) {
         alert('소속시군은 비워둘 수 없어요.');
         return;
@@ -1046,7 +994,6 @@ function renderMine(pairs) {
 
       const updated = {
         name: name,
-        phone: '010-' + phone1 + '-' + phone2,
         region: region,
         consent: e.consent,
         remark: remark,
@@ -1225,13 +1172,6 @@ async function adminEditEntry(key) {
   card.innerHTML =
     '<p style="font-weight:700; color:var(--soil-dark); margin:0 0 14px;">' + escapeHtml(entry.name) + '님 실적 수정 (관리자)</p>' +
     '<div class="field"><label>성명</label><input type="text" class="ae-name" value="' + escapeHtml(entry.name || '') + '"></div>' +
-    '<div class="field"><label>휴대폰번호</label><div class="phone-row">' +
-      '<input type="text" value="010" disabled class="phone-fixed">' +
-      '<span>-</span>' +
-      '<input type="text" class="ae-phone-1" inputmode="numeric" maxlength="4" value="' + escapeHtml((entry.phone || '').split('-')[1] || '') + '">' +
-      '<span>-</span>' +
-      '<input type="text" class="ae-phone-2" inputmode="numeric" maxlength="4" value="' + escapeHtml((entry.phone || '').split('-')[2] || '') + '">' +
-    '</div></div>' +
     '<div class="field"><label>소속시군</label><input type="text" class="ae-region" value="' + escapeHtml(entry.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
     '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row ae-remark">' +
       ['2024','2025','2026'].map(function(y) {
@@ -1245,11 +1185,6 @@ async function adminEditEntry(key) {
   panel.innerHTML = '';
   panel.appendChild(card);
 
-  card.querySelectorAll('.ae-phone-1, .ae-phone-2').forEach(function(el) {
-    el.addEventListener('input', function() {
-      el.value = el.value.replace(/[^0-9]/g, '').slice(0, 4);
-    });
-  });
   card.querySelectorAll('.ae-remark .choice').forEach(function(el) {
     el.addEventListener('click', function() {
       card.querySelectorAll('.ae-remark .choice').forEach(function(c) { c.classList.remove('selected'); });
@@ -1273,8 +1208,6 @@ async function adminEditEntry(key) {
 
   card.querySelector('.ae-save').addEventListener('click', async function() {
     const name = card.querySelector('.ae-name').value.trim();
-    const phone1 = card.querySelector('.ae-phone-1').value.trim();
-    const phone2 = card.querySelector('.ae-phone-2').value.trim();
     const region = card.querySelector('.ae-region').value.trim();
     const remarkSel = card.querySelector('.ae-remark .choice.selected');
     const remark = remarkSel ? remarkSel.dataset.value : '';
@@ -1284,12 +1217,10 @@ async function adminEditEntry(key) {
     if (result.hasError || result.programs.length === 0) return;
 
     if (!name) { alert('성명은 비워둘 수 없어요.'); return; }
-    if (phone1.length !== 4 || phone2.length !== 4) { alert('휴대폰번호를 정확히 입력해 주세요.'); return; }
     if (!region) { alert('소속시군은 비워둘 수 없어요.'); return; }
 
     const updated = {
       name: name,
-      phone: '010-' + phone1 + '-' + phone2,
       region: region,
       consent: entry.consent,
       remark: remark,
@@ -1365,7 +1296,6 @@ function renderSummary(pairs) {
 
     finalRows += '<tr>';
     finalRows += '<td class="name">' + escapeHtml(e.name) + '</td>';
-    finalRows += '<td>' + escapeHtml(e.phone || '') + '</td>';
     finalRows += '<td>' + escapeHtml(e.region || '') + '</td>';
     finalRows += '<td>치유농업사</td>';
     ORG_BUCKETS.forEach(function(b) {
@@ -1383,7 +1313,7 @@ function renderSummary(pairs) {
     finalRows += '</tr>';
   });
 
-  finalBody.innerHTML = rowCount ? finalRows : '<tr class="empty-row"><td colspan="21">아직 집계할 실적이 없어요.</td></tr>';
+  finalBody.innerHTML = rowCount ? finalRows : '<tr class="empty-row"><td colspan="20">아직 집계할 실적이 없어요.</td></tr>';
 
   finalBody.querySelectorAll('.delete-row-btn').forEach(function(btn) {
     btn.addEventListener('click', async function() {
@@ -1440,7 +1370,6 @@ function downloadExcel() {
     programs.forEach(function(p, idx) {
       rows.push({
         '성명': e.name || '',
-        '휴대폰번호': e.phone || '',
         '소속시군': e.region || '',
         '실적구분': '실적' + (idx + 1),
         '구분': p.type || '',
@@ -1501,7 +1430,6 @@ function downloadExcel() {
 
     const row = {
       '성명': e.name || '',
-      '휴대폰번호': e.phone || '',
       '소속시군': e.region || '',
       '구분': '치유농업사'
     };
@@ -1533,7 +1461,7 @@ function downloadExcel() {
   });
 
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];
+  ws['!cols'] = [{ wch: 10 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 40 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '활용실적');
 

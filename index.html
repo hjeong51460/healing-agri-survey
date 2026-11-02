@@ -353,6 +353,9 @@
       <div class="field">
         <label>치유농업사 취득연도</label>
         <div class="choice-row" id="f-remark">
+          <div class="choice" data-value="2021">2021</div>
+          <div class="choice" data-value="2022">2022</div>
+          <div class="choice" data-value="2023">2023</div>
           <div class="choice" data-value="2024">2024</div>
           <div class="choice" data-value="2025">2025</div>
           <div class="choice" data-value="2026">2026</div>
@@ -1001,7 +1004,7 @@ function renderMine(pairs) {
       '<div class="field"><label>성명</label><input type="text" class="m-e-name" value="' + escapeHtml(e.name) + '"></div>' +
       '<div class="field"><label>소속시군</label><input type="text" class="m-e-region" value="' + escapeHtml(e.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
       '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row m-e-remark">' +
-        ['2024','2025','2026'].map(function(y) {
+        ['2021','2022','2023','2024','2025','2026'].map(function(y) {
           return '<div class="choice' + (y === e.remark ? ' selected' : '') + '" data-value="' + y + '">' + y + '</div>';
         }).join('') +
       '</div></div>' +
@@ -1234,7 +1237,7 @@ async function adminEditEntry(key) {
     '<div class="field"><label>성명</label><input type="text" class="ae-name" value="' + escapeHtml(entry.name || '') + '"></div>' +
     '<div class="field"><label>소속시군</label><input type="text" class="ae-region" value="' + escapeHtml(entry.region || '') + '" placeholder="예: OO시 / OO군"></div>' +
     '<div class="field"><label>치유농업사 취득연도</label><div class="choice-row ae-remark">' +
-      ['2024','2025','2026'].map(function(y) {
+      ['2021','2022','2023','2024','2025','2026'].map(function(y) {
         return '<div class="choice' + (y === entry.remark ? ' selected' : '') + '" data-value="' + y + '">' + y + '</div>';
       }).join('') +
     '</div></div>' +
